@@ -11,6 +11,13 @@
 
 #include "NoiseMap.h"
 
+struct Triangle
+{
+    float vertices[9];
+    float nx,ny,nz;
+    float r,g,b;
+};
+
 class MeshData
 {
     NoiseMap* nmap;
@@ -29,6 +36,11 @@ public:
                 AddTriangle(nmap->noisemap[y * height+x], nmap->noisemap[(y+1) * height + x + 1], nmap->noisemap[(y+1) * height+x]);
                 AddTriangle(nmap->noisemap[(y + 1) * height + x + 1], nmap->noisemap[y * height + x], nmap->noisemap[y * height + x + 1]);
             }
+    }
+    
+    ~MeshData()
+    {
+        delete[] triangles;
     }
     
     void AddTriangle(float a, float b, float c)

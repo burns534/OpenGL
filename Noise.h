@@ -25,7 +25,7 @@ public:
     Noise()
     {
         srand ( (unsigned) time(NULL) );
-        unsigned long j = rand() % 1000;
+        unsigned long j = rand() % 500;
         for (int i = 0; i < 256; i ++)
         {
             j = 5 * j + 1;
@@ -92,7 +92,7 @@ public:
     {
         return a + x * (b - a);
     }
-    int &inc(int &num)
+    int inc(int num)
     {
         num++;
 //        if (repeat > 0) num %= repeat;

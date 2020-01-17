@@ -12,7 +12,7 @@
 
 #include "Noise.h"
 #include <random>
-
+#include <iostream>
 
 class NoiseMap
 {
@@ -27,18 +27,31 @@ public:
         srand( (unsigned)time(NULL) );
         h = height;
         w = width;
-        noisemap = new float[width * height];
+        noisemap = new float[(width + 2) * (height + 2)];
         address = noisemap;
         n = new Noise();
-        for ( int y = 0; y < height; y++ )
-            for ( int x = 0; x < width; x++, noisemap++ )
+        for ( int y = 0; y < height + 2; y++ ) // + 2 allows for gaussian blur and clipping the egdes off later.
+            for ( int x = 0; x < width + 2; x++, noisemap++ )
             {
-                *noisemap = n->OctavePerlin( x * 50.34f, y * 50.34f, 0, 8, .50, .001f);
+                *noisemap = n->OctavePerlin( x * 50.34f, y * 50.34f, 0, 8, .50, .00024f); // ~.00024 appears to be optimal
+                //std::cout << "here: " << *noisemap << "\n";
             }
         noisemap = address;
+        for (int i = 0; i < 4; i ++) blur();
+        // create temp to clip edges
+        float * temp = new float[width * height];
+        for(int y = 0; y < height; y ++)
+            for ( int x = 0; x < width; x++)
+            {
+                temp[y * height + x] = noisemap[(y+1) * (height + 2) + x + 1];
+            }
+        delete[] noisemap;
+        // refill clipped noisemap from temp
+        noisemap = new float[width * height];
+        for ( int y = 0; y < height; y ++)
+            for ( int x = 0; x < width; x++) noisemap[y * height + x] = temp[y * height + x];
+        delete[] temp;
         
-        blur();
-        blur();
     }
 
     ~NoiseMap()
@@ -48,11 +61,16 @@ public:
         delete[] noisemap;
     }
     
+    void correct()
+    {
+        for ( int y = 0; y < h; y ++)
+            for ( int x = 0; x < w; x++) noisemap[y * h + x] *= 0.65f;
+    }
     void blur()
     {
         float sum = 0;
-        for (int y = 1; y < h - 1; y ++)
-            for (int x = 1; x < w - 1; x++)
+        for (int y = 1; y < h + 1 ; y ++)
+            for (int x = 1; x < w + 1; x++)
             {
                 sum = 0;
                 // 3x3 gaussian kernel
@@ -65,7 +83,8 @@ public:
                 sum += noisemap[(y-1) * h + x + 1] * .0625; // upper right cell
                 sum += noisemap[(y+1) * h + x - 1] * .0625; // lower left cell
                 sum += noisemap[(y+1) * h + x + 1] * 0.625; // lower right cell
-                noisemap[y * h + x] = sum * 0.65f;
+                if (0.65f * sum < .44f) noisemap[y * h + x] = 0.46f;
+                else noisemap[y * h + x] = 0.645f * sum;
             }
     }
 };
