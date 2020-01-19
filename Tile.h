@@ -24,7 +24,7 @@ class Tile
     
 public:
     RGBType* pixels;
-    Tile(int width, int height, int tilesize)
+    Tile(int tilesize)
     {
         pixels = new RGBType[tilesize*tilesize];
     }
@@ -39,63 +39,61 @@ public:
     int tsize;
     c Win;
     Noise* no;
-    NoiseMap* gen;
     MeshData * meshdata;
     //std::vector< std::vector< Tile* > > field;
-    Tile *** field;
     Map(int width, int height, int tilesize, int windowx, int windowy, float xlight, float ylight, float zlight)
     {
         no = new Noise();
-        gen = new NoiseMap(width, height);
-        field = new Tile**[height];
-        for (int i = 0; i < height; i++) field[i] = new Tile*[width];
+        meshdata = new MeshData(width, height);
         w = width;
         h = height;
         tsize = tilesize;
         float f;
-        RGBType* address;
         float red, green, blue;
-        float* zedd = gen->noisemap;
-        //std::vector< std::vector< Tile* > > field(height, std::vector< Tile* >(width));
-        // this needs to be dealt with for triangular data, might be where some of the issue is coming from
-        // needs to iterate to height - 1 and also needs to assign each triangle its own color based on the avg height of the vertices
-        // it then needs to calculate the dot product between the unit light source and the normal of the triangle and use that as a factor to multiply
-        // the color value by for shading
-        for (int y = 0; y < height; y++)
-            for (int x = 0; x < width; x++, zedd++ )
+        
+        // normalize light source vector
+        float mag = pow( xlight * xlight + ylight * ylight + zlight * zlight, 0.5f);
+        xlight /= mag;
+        ylight /= mag;
+        zlight /= mag;
+        //float* zedd = gen->noisemap; // This wasn't the same as the fucking meshdata noisemap!!! No wonder lol
+        
+        // meshdata->vectex is of dimensions [2 * (w-1) * (h-1)] to store all triangles
+        // need to add RGB values to each tile based on the avg of its 3 vertices' y values and then multiply each rgb value by factor f from dot product of
+        // triangle's normal vector and the light vector <xlight, ylight, zlight>
+        float avg;
+        int count = 0;
+        for (int i = 0; i < 2 * (width - 1) * (height - 1); i++, count++)
             {
-                field[x][y] = new Tile(width, height, tilesize);
-                address = &*field[x][y]->pixels;
-//                red = (float) no->OctavePerlin(2 * (float) x / width - 0.02f + (float) x, (float) y / height + float(y), 3, 3, .5);
-//                green = (float) no->OctavePerlin(2 * (float) x / width - 0.02f + (float) x, (float) y / height + float(y), 3, 3, .5);
-//                blue = (float) no->OctavePerlin(2 * (float) x / width - 0.02f + (float) x, (float) y / height + float(y), 3, 3, .5);
-                //zedd = (float) no->OctavePerlin(2 * (float) x / width - 0.02f + (float) x, (float) y / height + float(y), 3, 3, .5);
-                if ( * zedd < 0.48f ) // water
+                // average the heights of each triangle's 3 vertices.
+                avg = (meshdata->vectex[i].vertices[0].y + meshdata->vectex[i].vertices[1].y + meshdata->vectex[i].vertices[2].y) / 3.0f;
+                // assign appropriate color values
+                if ( avg < 0.48f ) // water
                 {
                     red = 0.0f;
                     green = 46.0f / 255;
                     blue = 203.0f / 255;
-                } else if ( * zedd < 0.50f ) // sand
+                } else if ( avg < 0.50f ) // sand
                 {
                     red = 1.0f;
                     green = 220.0f / 255;
                     blue = 147.0f / 255;
-                } else if ( * zedd < 0.59) // regular green
+                } else if ( avg < 0.59) // regular green
                 {
                     red = 0.0f;
                     green = 185.0f / 300;
                     blue = 33.0f / 300;
-                } else if ( * zedd < 0.63 ) // green 2
+                } else if ( avg < 0.63 ) // green 2
                 {
                     red = 65.0f / 255;
                     green = 162.0f / 255;
                     blue = 30.0f / 255;
-                } else if ( * zedd < 0.7 ) // mountain 1
+                } else if ( avg < 0.7 ) // mountain 1
                 {
                     red = 100.0f / 255;
                     green = 94.0f / 255;
                     blue = 83.0f / 255;
-                } else if ( * zedd < 0.72 ) // mountain 2
+                } else if ( avg < 0.72 ) // mountain 2
                 {
                     red = 71.0f / 255;
                     green = 72.0f / 255;
@@ -105,14 +103,19 @@ public:
                     red = blue = green = 0.95f;
                 }
                 
-                for(int i = 0; i < tilesize; i++)
-                    for (int k = 0; k < tilesize; k++)
-                    {
-                        field[x][y]->pixels[i * tilesize + k].r = red; // need to multiply by factor f;
-                        field[x][y]->pixels[i * tilesize + k].g = green;
-                        field[x][y]->pixels[i * tilesize + k].b = blue;
-                    }
-                //field[x][y]->pixels = address;
+                // calculate dot product on unit normal and unit light vector
+                
+                f = xlight * meshdata->vectex[i].normal.x + ylight * meshdata->vectex[i].normal.y + zlight * meshdata->vectex[i].normal.z;
+                // the problem is because the sun vector is a point, not a vector to each tile... each tile needs its own sun vector if it's to be a point source
+                // otherwise it's pointing in the wrong direction
+               
+                // adjust rgb values proportional to dot product
+                std::cout << "f: " << f << "\n";
+                meshdata->vectex[i].color.r = red * f ;
+                meshdata->vectex[i].color.b = blue * f;
+                meshdata->vectex[i].color.g = green * f;
+                //std::cout << "count, color: " << count << ", " << red + green + blue << "\n";
+                //std::cout << "avg, f, red: " << avg << " ," << f << ", " << red << "\n";
             }
         Win.x = windowx;
         Win.y = windowy;
@@ -121,12 +124,7 @@ public:
     ~Map()
     {
         delete no;
-        delete gen;
-        for (int y = 0; y < h; y ++)
-            for (int x = 0; x < w; x++) delete field[x][y];
-        
-        for (int i = 0; i < h; i++) delete[] field[i];
-        delete[] field;
+        delete meshdata;
     }
 };
 

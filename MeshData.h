@@ -26,34 +26,32 @@ struct Triangle
     Coord vertices[3];
     Coord normal;
     RGBType color;
+    Coord center;
 };
 
 class MeshData
 {
     NoiseMap* nmap;
-    int triangleindex;
-    Triangle * vectex;
     int vectexindex;
 public:
-    float* triangles;
+    Triangle * vectex;
     MeshData(int width, int height)
     {
         nmap = new NoiseMap(width, height);
-        vectex = new Triangle[(width - 1) * (width - 1)];
-        triangles = new float[6 * (width-1) * (height-1)]; //triangle array to hold mesh y values
-        triangleindex = 0;
-        
+        vectex = new Triangle[2 * (width - 1) * (width - 1)];
+        vectexindex = 0;
+        //nmap->noisemap is 1d array of dimensions [width * height] so need to access it as such
         for ( int y = 0; y < height - 1; y++ )
             for ( int x = 0; x < width - 1; x ++ )
             {
-                AddTriangle(x, y, x + 1, y + 1, x, y + 1, nmap->noisemap[y * height+x], nmap->noisemap[(y+1) * height + x + 1], nmap->noisemap[(y+1) * height+x]);
-                AddTriangle(x + 1, y + 1, x , y , x +1, y , nmap->noisemap[(y + 1) * height + x + 1], nmap->noisemap[y * height + x], nmap->noisemap[y * height + x + 1]);
+                AddTriangle(x, y, x + 1, y + 1, x, y + 1, nmap->noisemap[y * (width)+x], nmap->noisemap[(y+1) * (width) + x + 1], nmap->noisemap[(y+1) * (width)+x]);
+                AddTriangle(x + 1, y + 1, x , y , x + 1, y , nmap->noisemap[(y + 1) * (width) + x + 1], nmap->noisemap[y * (width) + x], nmap->noisemap[y * width + x + 1]);
             }
     }
     
     ~MeshData()
     {
-        delete[] triangles;
+        delete[] vectex; delete nmap;
     }
     void AddNormal(int x, int y, float a, float b, float c)
     {
@@ -64,30 +62,32 @@ public:
         vectex[vectexindex].vertices[0].x = x;
         vectex[vectexindex].vertices[0].z = y;
         vectex[vectexindex].vertices[0].y = a;
-        vectex[vectexindex].vertices[1].x = x + 1;
-        vectex[vectexindex].vertices[1].z = y + 1;
+        vectex[vectexindex].vertices[1].x = x1;
+        vectex[vectexindex].vertices[1].z = y1;
         vectex[vectexindex].vertices[1].y = b;
-        vectex[vectexindex].vertices[2].x = x;
-        vectex[vectexindex].vertices[2].z = y + 1;
+        vectex[vectexindex].vertices[2].x = x2;
+        vectex[vectexindex].vertices[2].z = y2;
         vectex[vectexindex].vertices[2].y = c;
         
+        /* THIS IS WRONG AND NOT GENERIC FOR ALL TRIANGLES, IT ONLY WORKS FOR HALF OF THEM */
         // calculate normal vector for triangle
-        
-        float tempx = c - b; // everything else cancelled
+        float tempx = (a - b) * (y2 - y1) - (y - y1) * (c - b);
+        float tempy = (y - y1) * (x2 - x1) - (x - x1) * (y2 - y1);
         // tempy turned out to be 1 always
-        float tempz = a - c;
+        float tempz = (x - x1) * (c - b) - (a - b) * (x2 - x1);
         
         // normalize vector and add to object
         float magnitude = pow(tempx * tempx + 1 + tempz * tempz, 0.5f);
         vectex[vectexindex].normal.x = tempx / magnitude;
-        vectex[vectexindex].normal.y = 1 / magnitude;
+        vectex[vectexindex].normal.y = tempy / magnitude;
         vectex[vectexindex].normal.z = tempz / magnitude;
-        //std::cout << "normal vector: < " << tempx / magnitude << " , " << 1 / magnitude << " , " << tempz / magnitude << " >\n";
         
-        triangles[triangleindex] = a; // adds all 3 vertices for our triangle to the triangles array
-        triangles[triangleindex+1] = b;
-        triangles[triangleindex+2] = c;
-        triangleindex += 3;
+        // calculate center point
+        vectex[vectexindex].center.x = (x + x1 + x2) / 3.0f;
+        vectex[vectexindex].center.y = (y + y1 + y2) / 3.0f;
+        vectex[vectexindex].center.z = (a + b + c) / 3.0f;
+        //std::cout << "normal vector: < " << tempx / magnitude << " , " << 1 / magnitude << " , " << tempz / magnitude << " >\n";
+        vectexindex += 1;
     }
 };
 

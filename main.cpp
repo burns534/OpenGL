@@ -31,7 +31,6 @@ float Sunx = 1.0f; float Suny = 3.0f; float Sunz = 1.0f;
 
 
 Map n(400, 400, 4, 800, 800, Sunx, Suny, Sunz);
-MeshData mesh(400, 400);
 void processNormalKeys(unsigned char key, int ex, int why)
 {
     if ( key == 27 || key == 'q') exit(0);
@@ -166,40 +165,18 @@ void renderScene(void)
    glutSolidSphere(.2f, 20, 20);
    glPopMatrix();
     
-    int counter = 0;
-    for ( int y = 0; y < n.h - 1; y++ )
-        for ( int x = 0; x < n.w - 1; x++, counter += 6 )
+    for (int i = 0; i < 2 * (n.h - 1) * (n.w - 1); i++)
         {
-            
             glBegin(GL_TRIANGLES);
-            glColor3f(n.field[x][y]->pixels[0].r, n.field[x][y]->pixels[1].g, n.field[x][y]->pixels[2].b );
-            //glColor3f(mesh.triangles[counter], mesh.triangles[counter + 1], mesh.triangles[counter + 2]);
-            //    glVertex3f((float)(map.currentpos.x-map.start.x) / map.Win.x, (float)(map.start.y-map.currentpos.y) / map.Win.y, -5);
-//            glVertex3f((float) 4 * x / n.w - 2.0f, 4 * (float) -y / n.h + 2.0f, mesh.triangles[counter]);
-//            glVertex3f((float) 4 * (x + 1) / n.w - 2.0f, 4 * (float) (-y-1) / n.h + 2.0f, mesh.triangles[counter + 1]);
-//            glVertex3f((float) 4 * x / n.w - 2.0f, 4 * (float) (-y-1) / n.h + 2.0f, mesh.triangles[counter + 2]);
-//            glVertex3f((float) 4 * (x +1 ) / n.w - 2.0f, 4 * (float) (-y-1) / n.h + 2.0f, mesh.triangles[counter + 3]);
-//            glVertex3f((float) 4 * x / n.w - 2.0f, 4 * (float) y / n.h + 2.0f, mesh.triangles[counter + 4]);
-//            glVertex3f((float) 4 * (x + 1) / n.w - 2.0f, 4 * (float) y / n.h + 2.0f, mesh.triangles[counter + 5]);
-            //std::cout << "x, y: " << x << ", " << y << "\n";
-            glVertex3f((float) 4 * x / n.w - 2.0f, mesh.triangles[counter],  4 * (float) -y / n.h + 2.0f);
-            //std::cout << "mesh.triangles[counter]: " << mesh.triangles[counter] << "\n";
-            glVertex3f((float) 4 * (x + 1) / n.w - 2.0f, mesh.triangles[counter + 1], 4 * (float) (-y-1) / n.h + 2.0f);
-            //std::cout << "mesh.triangles[counter + 1]: " << mesh.triangles[counter + 1] << "\n";
-            glVertex3f((float) 4 * x / n.w - 2.0f, mesh.triangles[counter + 2], 4 * (float) (-y-1) / n.h + 2.0f);
-            //std::cout << "mesh.triangles[counter + 2]: " << mesh.triangles[counter + 2] << "\n";
             
+            /* HERE change functions to accept parameters from the meshdata->vectex triangle objects.*/
+            glColor3f(n.meshdata->vectex[i].color.r, n.meshdata->vectex[i].color.g, n.meshdata->vectex[i].color.b);
+//
+            glVertex3f(4 * (float)n.meshdata->vectex[i].vertices[0].x / n.w - 2.0f, n.meshdata->vectex[i].vertices[0].y, 4 * (float)n.meshdata->vectex[i].vertices[0].z / n.h - 2.0f);
+            //std::cout << "this: " << 4 * (float)n.meshdata->vectex[i].vertices[0].x / n.w - 2.0f << " color: " << n.meshdata->vectex[i].color.r << "\n";
+            glVertex3f(4 * (float) n.meshdata->vectex[i].vertices[1].x / n.w - 2.0f, n.meshdata->vectex[i].vertices[1].y, 4 * (float) n.meshdata->vectex[i].vertices[1].z / n.h - 2.0f);
             
-            //glEnd();
-            //glColor3f(n.field[x][y]->pixels[0].r, n.field[x][y]->pixels[0].g, n.field[x][y]->pixels[0].b );
-            //glBegin(GL_TRIANGLES);
-            
-            glVertex3f((float) 4 * (x + 1 ) / n.w - 2.0f, mesh.triangles[counter + 3], 4 * (float) (-y-1) / n.h + 2.0f);
-            //std::cout << "mesh.triangles[counter + 3]: " << mesh.triangles[counter + 3] << "\n";
-            glVertex3f((float) 4 * x / n.w - 2.0f, mesh.triangles[counter + 4], 4 * (float) -y / n.h + 2.0f);
-            //std::cout << "mesh.triangles[counter + 4]: " << mesh.triangles[counter + 4] << "\n";
-            glVertex3f((float) 4 * (x + 1) / n.w - 2.0f, mesh.triangles[counter + 5], 4 * (float) -y / n.h + 2.0f);
-            //std::cout << "mesh.triangles[counter + 5]: " << mesh.triangles[counter + 5] << "\n";
+            glVertex3f(4 * (float) n.meshdata->vectex[i].vertices[2].x / n.w - 2.0f, n.meshdata->vectex[i].vertices[2].y, 4 * (float) n.meshdata->vectex[i].vertices[1].z / n.h - 2.0f);
             glEnd();
         }
     
