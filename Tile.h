@@ -102,10 +102,10 @@ public:
                 {
                     red = blue = green = 0.95f;
                 }
-                
+            
                 // calculate dot product on unit normal and unit light vector
-                
-                f = xlight * meshdata->vectex[i].normal.x + ylight * meshdata->vectex[i].normal.y + zlight * meshdata->vectex[i].normal.z;
+                // causes shading to be more pronounced since all of the dot products hovered around 0.9...
+                f = 110 * (xlight * meshdata->vectex[i].normal.x + ylight * meshdata->vectex[i].normal.y + zlight * meshdata->vectex[i].normal.z - 0.9f);
                 // the problem is because the sun vector is a point, not a vector to each tile... each tile needs its own sun vector if it's to be a point source
                 // otherwise it's pointing in the wrong direction
                
