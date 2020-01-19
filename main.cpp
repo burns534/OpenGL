@@ -27,7 +27,7 @@ float x = 0.0; float z = 0.0f; float y = 1.2f;
 
 float fraction = 0.6f;
 // Define sun location
-float Sunx = 1.0f; float Suny = 3.0f; float Sunz = 1.0f;
+float Sunx = 4.0f; float Suny = 2.0f; float Sunz = 0.0f;
 
 
 Map n(400, 400, 4, 800, 800, Sunx, Suny, Sunz);
@@ -172,11 +172,11 @@ void renderScene(void)
             /* HERE change functions to accept parameters from the meshdata->vectex triangle objects.*/
             glColor3f(n.meshdata->vectex[i].color.r, n.meshdata->vectex[i].color.g, n.meshdata->vectex[i].color.b);
 //
-            glVertex3f(4 * (float)n.meshdata->vectex[i].vertices[0].x / n.w - 2.0f, n.meshdata->vectex[i].vertices[0].y, 4 * (float)n.meshdata->vectex[i].vertices[0].z / n.h - 2.0f);
+            glVertex3f(n.meshdata->vectex[i].vertices[0].x, n.meshdata->vectex[i].vertices[0].y, n.meshdata->vectex[i].vertices[0].z);
             //std::cout << "this: " << 4 * (float)n.meshdata->vectex[i].vertices[0].x / n.w - 2.0f << " color: " << n.meshdata->vectex[i].color.r << "\n";
-            glVertex3f(4 * (float) n.meshdata->vectex[i].vertices[1].x / n.w - 2.0f, n.meshdata->vectex[i].vertices[1].y, 4 * (float) n.meshdata->vectex[i].vertices[1].z / n.h - 2.0f);
+            glVertex3f(n.meshdata->vectex[i].vertices[1].x, n.meshdata->vectex[i].vertices[1].y, n.meshdata->vectex[i].vertices[1].z);
             
-            glVertex3f(4 * (float) n.meshdata->vectex[i].vertices[2].x / n.w - 2.0f, n.meshdata->vectex[i].vertices[2].y, 4 * (float) n.meshdata->vectex[i].vertices[1].z / n.h - 2.0f);
+            glVertex3f(n.meshdata->vectex[i].vertices[2].x, n.meshdata->vectex[i].vertices[2].y, n.meshdata->vectex[i].vertices[1].z);
             glEnd();
         }
     

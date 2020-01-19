@@ -77,7 +77,7 @@ public:
                 sum += tempmap[x+1][y+1] * .0625; // upper right cell
                 sum += tempmap[x-1][y-1] * .0625; // lower left cell
                 sum += tempmap[x+1][y-1] * 0.625; // lower right cell
-                if (0.65f * sum < .44f) tempmap[x][y] = 0.46f;
+                if (0.65f * sum < .455) tempmap[x][y] = 0.455f;
                 else tempmap[x][y] = 0.645f * sum;
             }
     }
