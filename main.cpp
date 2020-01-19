@@ -8,7 +8,6 @@
 
 
 #include "Tile.h"
-#include "MeshData.h"
 #include <iostream>
 #include <OpenGL/gl.h>
 #include <OpenGl/glu.h>
@@ -31,7 +30,7 @@ float fraction = 0.6f;
 float Sunx = 1.0f; float Suny = 3.0f; float Sunz = 1.0f;
 
 
-Map n(400, 400, 4, 800, 800);
+Map n(400, 400, 4, 800, 800, Sunx, Suny, Sunz);
 MeshData mesh(400, 400);
 void processNormalKeys(unsigned char key, int ex, int why)
 {

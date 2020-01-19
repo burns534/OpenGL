@@ -8,14 +8,10 @@
 
 #ifndef Tile_h
 #define Tile_h
-#include "Noise.h"
-#include "NoiseMap.h"
 #include <iostream>
+#include "MeshData.h"
 
-struct RGBType
-{
-    float r,g,b;
-};
+
 
 struct c
 {
@@ -44,9 +40,10 @@ public:
     c Win;
     Noise* no;
     NoiseMap* gen;
+    MeshData * meshdata;
     //std::vector< std::vector< Tile* > > field;
     Tile *** field;
-    Map(int width, int height, int tilesize, int windowx, int windowy)
+    Map(int width, int height, int tilesize, int windowx, int windowy, float xlight, float ylight, float zlight)
     {
         no = new Noise();
         gen = new NoiseMap(width, height);
@@ -55,10 +52,15 @@ public:
         w = width;
         h = height;
         tsize = tilesize;
+        float f;
         RGBType* address;
         float red, green, blue;
         float* zedd = gen->noisemap;
         //std::vector< std::vector< Tile* > > field(height, std::vector< Tile* >(width));
+        // this needs to be dealt with for triangular data, might be where some of the issue is coming from
+        // needs to iterate to height - 1 and also needs to assign each triangle its own color based on the avg height of the vertices
+        // it then needs to calculate the dot product between the unit light source and the normal of the triangle and use that as a factor to multiply
+        // the color value by for shading
         for (int y = 0; y < height; y++)
             for (int x = 0; x < width; x++, zedd++ )
             {
@@ -106,7 +108,7 @@ public:
                 for(int i = 0; i < tilesize; i++)
                     for (int k = 0; k < tilesize; k++)
                     {
-                        field[x][y]->pixels[i * tilesize + k].r = red;
+                        field[x][y]->pixels[i * tilesize + k].r = red; // need to multiply by factor f;
                         field[x][y]->pixels[i * tilesize + k].g = green;
                         field[x][y]->pixels[i * tilesize + k].b = blue;
                     }
