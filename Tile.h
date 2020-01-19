@@ -41,29 +41,20 @@ public:
     Noise* no;
     MeshData * meshdata;
     //std::vector< std::vector< Tile* > > field;
-    Map(int width, int height, int tilesize, int windowx, int windowy, float xlight, float ylight, float zlight)
+    Map(int width, int height, int tilesize, int windowx, int windowy)
     {
         no = new Noise();
         meshdata = new MeshData(width, height);
         w = width;
         h = height;
         tsize = tilesize;
-        float f;
         float red, green, blue;
-        
-        // normalize light source vector
-        float mag = pow( xlight * xlight + ylight * ylight + zlight * zlight, 0.5f);
-        xlight /= mag;
-        ylight /= mag;
-        zlight /= mag;
         
         // meshdata->vectex is of dimensions [2 * (w-1) * (h-1)] to store all triangles
         // need to add RGB values to each tile based on the avg of its 3 vertices' y values and then multiply each rgb value by factor f from dot product of
         // triangle's normal vector and the light vector <xlight, ylight, zlight>
         float avg;
-        int count = 0;
-        float tempx, tempy, tempz;
-        for (int i = 0; i < 2 * (width - 1) * (height - 1); i++, count++)
+        for (int i = 0; i < 2 * (width - 1) * (height - 1); i++)
             {
                 // average the heights of each triangle's 3 vertices.
                 avg = (meshdata->vectex[i].vertices[0].y + meshdata->vectex[i].vertices[1].y + meshdata->vectex[i].vertices[2].y) / 3.0f;
@@ -102,27 +93,10 @@ public:
                 {
                     red = blue = green = 0.95f;
                 }
-                 // -- This is for point source light --
-//                // calculate vector from tile to light source ( tiles facing sun need to be brightest )
-//                tempx = meshdata->vectex[i].center.x - xlight;
-//                tempy = meshdata->vectex[i].center.y - ylight;
-//                tempz = meshdata->vectex[i].center.z - zlight;
-//                // unitize light vector
-//                mag = pow(tempx * tempx + tempy * tempy + tempz * tempz, 0.5f);
-//                tempx /= -mag;
-//                tempy /= -mag;
-//                tempz /= -mag;
-                
-                // dot product of light vector and normal vector
-                f = xlight * meshdata->vectex[i].normal.x + ylight * meshdata->vectex[i].normal.y + zlight * meshdata->vectex[i].normal.z;
-                
-                // map f from (-1,1) to (0.0f, 1.0f) so it will be an appropriate factor
-                f = (f + 1) / 2.0f;
-                
-                // adjust rgb values proportional to f;
-                meshdata->vectex[i].color.r = red * f ;
-                meshdata->vectex[i].color.b = blue * f;
-                meshdata->vectex[i].color.g = green * f;
+               
+                meshdata->vectex[i].color.r = red;
+                meshdata->vectex[i].color.b = blue;
+                meshdata->vectex[i].color.g = green;
                 //std::cout << "count, color: " << count << ", " << red + green + blue << "\n";
                 //std::cout << "avg, f, red: " << avg << " ," << f << ", " << red << "\n";
             }

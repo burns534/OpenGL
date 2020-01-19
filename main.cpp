@@ -14,6 +14,7 @@
 #include <GLUT/glut.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "Shader.h"
 #define PI 3.14159265
 
 
@@ -30,7 +31,8 @@ float fraction = 0.6f;
 float Sunx = 4.0f; float Suny = 2.0f; float Sunz = 0.0f;
 
 
-Map n(400, 400, 4, 800, 800, Sunx, Suny, Sunz);
+Map n(400, 400, 4, 800, 800);
+Shader shader(400, 400, 4);
 void processNormalKeys(unsigned char key, int ex, int why)
 {
     if ( key == 27 || key == 'q') exit(0);
@@ -265,6 +267,8 @@ void run(int argc, char ** argv)
 
 int main(int argc, char ** argv) {
     //out.open("debug.txt");
+    // apply shading to all tiles
+    shader.Shade(Sunx, Suny, Sunz, n.meshdata);
     run(argc, argv);
 
     std::cout << "Hello, World!\n";
